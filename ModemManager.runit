@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+# File: /etc/sv/ModemManager/run
+# mkdir /run/runit/supervise.ModemManager/ ; cd /etc/sv/ModemManager ; ln -s /run/runit/supervise.ModemManager supervise
+# ln -s /etc/sv/ModemManager /var/service
+
+sv check dbus polkitd >/dev/null || exit 1
+exec chpst -u root /usr/sbin/ModemManager --filter-policy=strict
