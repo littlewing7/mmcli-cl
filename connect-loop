@@ -1,24 +1,25 @@
 #!/bin/bash
 
 ## connect and autoreconnect 
-## -- for my Sierra Netgear AirCard 320U Modem DirectIP-manual connection
+## 
 ##
-## (using mmcli 1.6.2)
-## <yadieet@gmail.com>
+## (using mmcli 1.8.1)
+## <massimo.manzato@gmail.com>
 
 cd /tmp
 cp /boot/scripts/sites.list .
 
 . mmcli_cl_functions
 
-trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGKILL SIGTERM
+#trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGKILL SIGTERM
+trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGTERM
 
 	#rfkill unblock all
 	#sleep 2
 	#ifconfig wifi0 192.168.1.254/24 up
 
-systemctl restart ModemManager
-atime=`date +%s`
+sv restart ModemManager
+atime=$(date +%s)
 connectx
 sleep 3
 
@@ -27,22 +28,23 @@ do
 	check
 	if [[ ! $result == 'yes' ]]; then
 		echo "not connected."
-		echo -n > /tmp/NOT-CONNECTED
+		echo -n > /dev/shm/NOT-CONNECTED
 		connectx
 		sleep 5
 	fi
 
 	echo -n "Testing.. "
-	testping=`ping -4 -s 1 -c 6 -i 4 -W 4 -w 20 $(shuf sites.list | head -1) |grep "9 bytes" |wc -l`
+	testping1=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n $(shuf sites.list | head -1) |grep "9 bytes" -c )
+	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n $(shuf sites.list | head -1) |grep "9 bytes" -c )
 
-	if [[ $testping -gt 0 ]]; then
+	if [[ $testping1 -gt 0 || $testping2 -gt 0 ]]; then
 		echo "connected."
-		[[ -e /tmp/NOT-CONNECTED ]] && rm /tmp/NOT-CONNECTED
+		[[ -e /dev/shm/NOT-CONNECTED ]] && rm /dev/shm/NOT-CONNECTED
 		sleep 40 &
 		wait $!
 	else
 		echo "not connected."
-		echo -n > /tmp/NOT-CONNECTED
+		echo -n > /dev/shm/NOT-CONNECTED
 		bearer -x
 		sleep 1
 	fi
