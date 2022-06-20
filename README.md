@@ -3,7 +3,7 @@
 
 this is a fork for Void-Linux and different modem identification: 
 
-1. independend from modem mobel 
+1. modem model aware
 2. run on void with runit 
 3. use mmcli 1.18.6 
 4. identify the infercace regardless of OS renaming
