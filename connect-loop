@@ -3,11 +3,11 @@
 ## connect and autoreconnect 
 ## 
 ##
-## (using mmcli 1.8.1)
+## (using mmcli 1.18.6)
 ## <massimo.manzato@gmail.com>
 
-cd /tmp
-cp /boot/scripts/sites.list .
+cd /dev/shm/ || exit
+cp /projects/MMA/mmcli-cl/sites.list .
 
 . mmcli_cl_functions
 
@@ -34,10 +34,10 @@ do
 	fi
 
 	echo -n "Testing.. "
-	testping1=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n $(shuf sites.list | head -1) |grep "9 bytes" -c )
-	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n $(shuf sites.list | head -1) |grep "9 bytes" -c )
+	testping1=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
+	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
 
-	if [[ $testping1 -gt 0 || $testping2 -gt 0 ]]; then
+	if [ "$testping1" -gt 0 ] && [ "$testping2" -gt 0 ]; then
 		echo "connected."
 		[[ -e /dev/shm/NOT-CONNECTED ]] && rm /dev/shm/NOT-CONNECTED
 		sleep 40 &

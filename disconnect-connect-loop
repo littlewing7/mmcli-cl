@@ -3,15 +3,15 @@
 ## disconnect
 ## -- for my DirectIP-manual connection
 ##
-## (using mmcli 1.8.1)
+## (using mmcli 1.18.6)
 ## <massimo.manzato@gmail.com>
 
 . mmcli_cl_functions
 
 isModemNotExists && echo "No any modem !" && exit
 
-im=$(mmcli -L |grep -m 1 "AirCard 320U" |cut -d/ -f6 |awk '{print $1}')
-pid=$(ps ax |grep "[s]udo /boot/scripts/connect-loop" |awk '{print $1}')
+im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+pid=$(ps ax |grep "[s]udo /project/MMA/mmcli-cl/connect-loop" |awk '{print $1}')
 
 if [[ ! -z "$pid" ]]; then
 	kill -s 2 "$pid"
@@ -21,7 +21,7 @@ fi
 
 echo "Process not exists."
 echo ">> Trying basic method.."
-scpid=$(ps ax |grep "[s]etup-connection" |awk '{print $1}')
+scpid=$(pgrep "etup-connection")
 [[ ! -z "$scpid" ]] && kill -s 15 "$scpid"
 pkill ping
 bearer -x
@@ -30,10 +30,7 @@ sleep 2
 mmcli -m "$im" -d
 	#mmcli -m "$im" --command=AT+CFUN=0
 sleep 2
-ip r d default via
-#echo -n > /etc/resolv.conf
-#echo -n > /etc/resolv.dnsmasq.conf
-mmcli -m "$im" --command=AT+CFUN=0
+ip r d default 
 sleep 2
 ## systemctl stop squid
 mmcli -m "$im" -r
