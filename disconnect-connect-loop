@@ -11,7 +11,7 @@
 isModemNotExists && echo "No any modem !" && exit
 
 im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
-pid=$(ps ax |grep "[s]udo /project/MMA/mmcli-cl/connect-loop" |awk '{print $1}')
+pid=$(ps ax |grep "connect-loop" |awk '{print $1}')
 
 if [[ ! -z "$pid" ]]; then
 	kill -s 2 "$pid"
