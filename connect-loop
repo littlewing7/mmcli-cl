@@ -8,6 +8,7 @@
 
 cd /dev/shm/ || exit
 cp /projects/MMA/mmcli-cl/sites.list .
+cp /projects/MMA/mmcli-cl/mmcli_cl_functions . 
 
 . mmcli_cl_functions
 
