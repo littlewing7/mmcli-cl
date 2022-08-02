@@ -1,6 +1,9 @@
 #!/bin/bash
 
-. mmcli_cl_functions
+wd=$(dirname $0)
+cp "$wd/sites.list" .
+
+. "$wd/mmcli_cl_functions"
 
 ## setup connection
 ## -- for my Modem DirectIP-manual connection

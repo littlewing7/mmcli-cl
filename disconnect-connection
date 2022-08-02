@@ -6,7 +6,10 @@
 ## (using mmcli 1.6.2)
 ## <yadieet@gmail.com>
 
-. mmcli_cl_functions
+wd=$(dirname $0)
+cp "$wd/sites.list" .
+
+. "$wd/mmcli_cl_functions"
 
 isModemNotExists && echo "No any modem !" && exit
 im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
