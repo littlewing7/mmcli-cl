@@ -52,7 +52,8 @@ if [ "${arrayM[modem.generic.bearers.length]}" == 1 ] ; then
 	echo "Bearer already exist."
 	echo "${arrayM[modem.generic.bearers.value[1]]}"
 else
-	mmcli -m "$im" --create-bearer="apn=mobile.vodafone.it" 
+	mmcli -m "$im" --create-bearer="apn=mobile.vodafone.it"
+	#mmcli -m "$im" --create-bearer="apn=datacard.tre.it"
 fi
 
 echo ">> Connecting.."
