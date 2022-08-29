@@ -36,9 +36,10 @@ do
 
 	echo -n "Testing.. "
 	testping1=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
-	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
+	#testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
+	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n 8.8.8.8 |grep "9 bytes" -c )
 
-	if [ "$testping1" -gt 0 ] && [ "$testping2" -gt 0 ]; then
+	if [ "$testping1" -gt 0 ] || [ "$testping2" -gt 0 ]; then
 		echo "connected."
 		[[ -e /dev/shm/NOT-CONNECTED ]] && rm /dev/shm/NOT-CONNECTED
 		sleep 40 &

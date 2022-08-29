@@ -77,7 +77,7 @@ do
 		((try++))
 		echo "failed. Trying again.. ($try)"
 
-		echo ">> Connecting.."
+		echo ">> Connecting.. in while"
 		sleep 7
 		! bearer -c && exit
 	fi	

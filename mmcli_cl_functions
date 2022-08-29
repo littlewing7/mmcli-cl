@@ -25,19 +25,25 @@ function bearer()
 		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 		[[ -z "$ib" ]] && echo "No any bearer." && return 1
 
+		echo "execute: " 
+		echo "-->> mmcli -m $im -b $ib $@ <<--"
 		mmcli -m "$im" -b "$ib" "$@"
 		return 0
 }
 
 function check()
 {
-	        declare -A arrayA="( $(mmcli -K --bearer 0 | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+
+                im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+	        declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 		result="${arrayA[bearer.status.connected]}"
 }
 
 function setIPandROUTE()
 {
-                declare -A arrayA="( $(mmcli -K --bearer 0 | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+                declare -A arrayA="( $(mmcli -K --bearer $im | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
                 
 		printf "Interface: %s\n" "${arrayA[bearer.status.interface]}"
 		ip link set up dev "${arrayA[bearer.status.interface]}"
