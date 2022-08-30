@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+export PS1="\[\033[94m\][\t] \[\033[01;31m\]\u@\h \[\033[95m\]\w\[\033[94m\] $(__git_ps1 '(%s)')\n#\[\]"
+
 . "$HOME/.bashrc"
 
 session="mmcli_cl_session"
