@@ -44,9 +44,12 @@ function setIPandROUTE()
 {
 		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
                 declare -A arrayA="( $(mmcli -K --bearer $im | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
-                
+
 		printf "Interface: %s\n" "${arrayA[bearer.status.interface]}"
 		ip link set up dev "${arrayA[bearer.status.interface]}"
+
+		# remove the actual ip on interface
+		ip a flush "${arrayA[bearer.status.interface]}"
 
 		printf "execute:  ip a replace %s dev %s\n" "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}" "${arrayA[bearer.status.interface]}"
 		ip a replace "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}" dev "${arrayA[bearer.status.interface]}"
