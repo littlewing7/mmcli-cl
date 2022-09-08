@@ -2,8 +2,8 @@
 
 . "$HOME/.bashrc"
 
-## connect and autoreconnect 
-## 
+## connect and autoreconnect
+##
 ##
 ## (using mmcli 1.18.6)
 ## <massimo.manzato@gmail.com>
@@ -36,15 +36,17 @@ do
 		sleep 5
 	fi
 
-	echo -n "Testing.. "
-	testping1=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
+	site1=$(shuf sites.list | head -1)
+  testtime=$(date +%T)
+	echo -n "$testtime  Testing.. $site1"
+	testping1=$(ping -4 -s 1 -c 6 -W 1 -n "$site1" | grep "9 bytes" -c )
 	#testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n "$(shuf sites.list | head -1)" |grep "9 bytes" -c )
-	testping2=$(ping -4 -s 1 -c 6 -i 4 -W 4 -w 20  -n 8.8.8.8 |grep "9 bytes" -c )
+	testping2=$(ping -4 -s 1 -c 6 -W 1 -n 8.8.8.8  | grep "9 bytes" -c )
 
 	if [ "$testping1" -gt 0 ] || [ "$testping2" -gt 0 ]; then
 		echo "connected."
 		[[ -e /dev/shm/NOT-CONNECTED ]] && rm /dev/shm/NOT-CONNECTED
-		sleep 40 &
+		sleep 2 &
 		wait $!
 	else
 		echo "not connected."
