@@ -34,16 +34,16 @@ function bearer()
 function check()
 {
 
-                im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+ 		im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-	        declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 		result="${arrayA[bearer.status.connected]}"
 }
 
 function setIPandROUTE()
 {
 		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-                declare -A arrayA="( $(mmcli -K --bearer $im | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 
 		printf "Interface: %s\n" "${arrayA[bearer.status.interface]}"
 		ip link set up dev "${arrayA[bearer.status.interface]}"
@@ -108,13 +108,13 @@ function disconnectx()
 		echo -n > /dev/shm/NOT-CONNECTED
 		bearer -x
 		mmcli -m "$im" --simple-disconnect
-		ip r d default 
+		ip r d default
 
 		#This disconnects the existing connection(s) for the modem and puts it into a low power mode
 		mmcli -m "$im" -d
 		sleep 2
 
-                #Resets the modem to the settings it had when it was power cycled. 
+		#Resets the modem to the settings it had when it was power cycled. 
 		mmcli -m "$im" -r
 		sleep 1
 		sv restart ModemManager
