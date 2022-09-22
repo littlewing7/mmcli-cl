@@ -15,7 +15,7 @@ cp "$wd/sites.list" .
 . "$wd/mmcli_cl_functions"
 
 #trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGKILL SIGTERM
-trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGTERM
+#trap 'disconnectx' SIGINT SIGQUIT SIGABRT SIGTERM
 
 	#rfkill unblock all
 	#sleep 2
@@ -43,7 +43,7 @@ do
   testtime=$(date +%T)
 
 	printf "%s Connected time: %s  Testing.. %s: " "$testtime" "${arrayA[bearer.stats.duration]}" "$site1"
-	if [ "${arrayA[bearer.stats.duration]}" -gt 14394 ]; then
+	if [ "${arrayA[bearer.stats.duration]}" -gt 14340 ]; then
 		printf "Restart Bearer ..."
 		mmcli -b "$ib" -x
 		mmcli -b "$ib" -c
