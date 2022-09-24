@@ -25,7 +25,7 @@ function bearer()
 		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 		[[ -z "$ib" ]] && echo "No any bearer." && return 1
 
-		printf "execute: -->> mmcli -m %s -b %s %s <<--\n" "$im" "$ib" "$@"
+		printf "%s execute: -->> mmcli -m %s -b %s %s <<--\n" "$(date +%T)" "$im" "$ib" "$@"
 		mmcli -m "$im" -b "$ib" "$@"
 		return 0
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wd=$(dirname $0)
+wd=$(dirname "$0")
 cp "$wd/sites.list" .
 
 . "$wd/mmcli_cl_functions"
@@ -30,7 +30,7 @@ bearer -x
 ip r d default
 echo
 
-echo ">> Enabling modem.."
+printf "%s >> Enabling Modem signal-setup : %s \n" "$(date +%T)" ""
 mmcli -m "$im" --signal-setup=2
 #mmcli -m "$im" --set-allowed-modes='any'
 #mmcli -m "$im" --set-allowed-modes='4g'
@@ -57,9 +57,10 @@ else
 	#mmcli -m "$im" --create-bearer="apn=datacard.tre.it"
 fi
 
-echo ">> Connecting.."
+echo ">> Connecting.."Connect
 try=0
-sleep 3
+sleep 1
+printf "%s >> Connecting Bearer: %s \n" "$(date +%T)" "${arrayA[bearer.properties.apn]}"
 ! bearer -c && exit
 
 while true
@@ -80,14 +81,14 @@ do
 		echo "failed. Trying again.. ($try)"
 
 		echo ">> Connecting.. in while"
-		sleep 7
+		printf "%s >> Connecting.. in a while : %s \n" "$(date +%T)" "${arrayA[bearer.properties.apn]}"
+		sleep 1
 		! bearer -c && exit
 	fi
 done
 
-sleep 2
+#sleep 2
 
 echo ">> Setup wwan interface and default route."
 setIPandROUTE
-
 
