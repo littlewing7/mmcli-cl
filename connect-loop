@@ -21,10 +21,11 @@ cp "$wd/sites.list" .
 	#sleep 2
 	#ifconfig wifi0 192.168.1.254/24 up
 
-sv restart ModemManager
+#sv restart ModemManager
 atime=$(date +%s)
-connectx
-sleep 3
+printf "%s Initial checks \n" "$(date +%T)"
+#connectx
+#sleep 3
 
 while true
 do
