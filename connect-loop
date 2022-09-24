@@ -60,6 +60,7 @@ do
 	testping2=0
 	testping1=$(ping -4 -s 1 -c 3 -W 1 -n "$site1" | grep " bytes" -c )
 	if [ "$testping1" -gt 0 ]; then
+		printf " FAILED!!\n%s  Testing.. %s: " "$(date +%T)" "8.8.8.8"
 		testping2=$(ping -4 -s 1 -c 3 -W 1 -n 8.8.8.8  | grep " bytes" -c )
 	fi
 
