@@ -64,6 +64,7 @@ do
 	fi
 
 	if [ "$testping1" -eq 0 ]; then
+		printf "%s time: %s  Testing.. %s: " "$(date +%T)" "${arrayA[bearer.stats.duration]}" "$site1"
 		printf " FAILED!!\n%s  Testing.. %s: \n" "$(date +%T)" "8.8.8.8"
 		testping2=$(ping -4 -s 1 -c 1 -W 1 -n 8.8.8.8  | grep "9 bytes" -c )
 	fi
