@@ -38,7 +38,7 @@ do
 	fi
 
 	site1=$(shuf sites.list | head -1)
-	printf "%s Connected time: %s  Testing.. %s: " "$(date +%T)" "${arrayA[bearer.stats.duration]}" "$site1"
+	printf "%s Connected time: %s  Testing.. %s: " "$(date +%T)" "" "$site1"
 
 	testping1=0
 	testping2=0
