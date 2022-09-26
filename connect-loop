@@ -21,9 +21,13 @@ cp "$wd/sites.list" .
 	#sleep 2
 	#ifconfig wifi0 192.168.1.254/24 up
 
+
+im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 #sv restart ModemManager
 atime=$(date +%s)
-printf "%s Initial checks \n" "$(date +%T)"
+printf "%s Initial checks, coneted time : %s \n" "$(date +%T)" "${arrayA[bearer.stats.duration]}"
 #connectx
 #sleep 3
 
