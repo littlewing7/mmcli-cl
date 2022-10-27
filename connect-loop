@@ -27,7 +27,7 @@ ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 #sv restart ModemManager
 atime=$(date +%s)
-printf "%s Initial checks, coneted time : %s \n" "$(date +%T)" "${arrayA[bearer.stats.duration]}"
+printf "%s Initial checks, connected time : %s seconds [30s min refresh intervals]\n" "$(date +%T)" "${arrayA[bearer.stats.duration]}"
 #connectx
 #sleep 3
 
