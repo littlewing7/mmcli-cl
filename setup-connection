@@ -49,7 +49,7 @@ echo ">> Creating bearer.."
 declare -A arrayM="( $(mmcli -m "$im" -K | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}') )"
 	#[[ $a == 1 ]] && mmcli -m $im --create-bearer="apn=3data,number=*99#,user=3data,password=3data,allow-roaming=1,ip-type=ipv4,allowed-auth=eap|pap|chap" || echo "Bearer already exist."
 #[[ "$a" == 1 ]] && mmcli -m "$im" --create-bearer="apn=indosatgprs,number=*99#,user=indosat,password=indosat,allow-roaming=1,ip-type=ipv4,allowed-auth=eap|pap|chap" || echo "Bearer already exist."
-if [ "${arrayM[modem.generic.bearers.length]}" -gt 0 ] ; then
+if [ "$((${arrayM[modem.generic.bearers.length]}))" -gt 0 ] ; then
 	echo "Bearer already exist."
 	echo "${arrayM[modem.generic.bearers.value[1]]}"
 else
@@ -60,7 +60,7 @@ fi
 echo ">> Connecting.."Connect
 try=0
 sleep 1
-printf "%s >> Connecting Bearer: %s \n" "$(date +%T)" "${arrayA[bearer.properties.apn]}"
+printf "%s -- Connecting Bearer: %s \n" "$(date +%T)" "${arrayA[bearer.properties.apn]}"
 ! bearer -c && exit
 
 while true
