@@ -10,7 +10,7 @@ tmux new-session -d -s $session
 window=1
 tmux rename-window -t $session:$window 'connect_loop'
 tmux send-keys -t $session:$window '/usr/bin/bash' C-m
-tmux send-keys -t $session:$window 'bash /projects/MMA/mmcli-cl/connect-loop' C-m
+tmux send-keys -t $session:$window 'bash /projects/MMA/mmcli-cl/connect-loop datacard.tre.it' C-m
 
 window=2
 tmux new-window -t $session:$window -n 'logs'
