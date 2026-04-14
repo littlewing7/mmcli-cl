@@ -69,7 +69,8 @@ do
 	if [ "$RXB" -eq 0 ] ; then
 		#sleep 1 &
 		#wait $!
-		say "RX are 0 ...  test ISP DNS : ${arrayA[bearer.ipv4-config.dns.value[1]]}"
+		printf "\n"
+		say " RX are 0 ...  test ISP DNS : ${arrayA[bearer.ipv4-config.dns.value[1]]}"
 		if host -W 2 "www.google.com" "${arrayA[bearer.ipv4-config.dns.value[1]]}" > /dev/null; then
 		    say "DNS OK "
         testdns="2"
