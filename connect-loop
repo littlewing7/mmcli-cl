@@ -64,32 +64,36 @@ do
 	say_overwrite "BearerUpTime: ${arrayA[bearer.stats.duration]} | RX: $RXB | TX: $TXB        "
 	#printf "BearerUpTime: |%s| \n" "${arrayA[bearer.stats.duration]}"
 
-	## Se trasmetto ma non ricevo 
-	if [ "$RXB" -eq 0 ] && [ "$TXB" -gt 0 ] ; then
+	## if data not received line probably is DOWN 
+	#if [ "$RXB" -eq 0 ] && [ "$TXB" -gt 0 ] ; then
+	if [ "$RXB" -eq 0 ] ; then
 		#sleep 1 &
 		#wait $!
-		say "Restart Bearer ${arrayA[bearer.properties.apn]} at : ${arrayA[bearer.stats.duration]} seconds "
-		mmcli -b "$ib" -x
-		say "Connect Bearer: ${arrayA[bearer.properties.apn]} "
-		mmcli -b "$ib" -c
-		say " ---> Start setup IP and Routes "
-		setIPandROUTE
-		say " ---> End setup IP and Routes "
-		ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		say "ping ISP DNS : ${arrayA[bearer.ipv4-config.dns.value[1]]}"
-		ping_test " DNS: " "${arrayA[bearer.ipv4-config.dns.value[1]]}"
-		if [ "$testping" -eq 0 ]; then
-			say "TEST 2 - ping : $site1"
-			ping_test "2" "$site1"
+		say "RX are 0 ...  test ISP DNS : ${arrayA[bearer.ipv4-config.dns.value[1]]}"
+		if host -W 2 "www.google.com" "${arrayA[bearer.ipv4-config.dns.value[1]]}" > /dev/null; then
+		    say "DNS OK "
+        testdns="2"
+		else
+		    say "Restart Bearer ${arrayA[bearer.properties.apn]} at : ${arrayA[bearer.stats.duration]} seconds "
+		    mmcli -b "$ib" --disconnect
+		    say "Connect Bearer: ${arrayA[bearer.properties.apn]} "
+		    mmcli -b "$ib" --connect
+		    say " ---> Start setup IP and Routes "
+		    setIPandROUTE
+		    say " ---> End setup IP and Routes "
+		    ## extract the new bearer ???  is this necessary ?
+		    ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+		    #echo "DNS FALLITO"
+        testdns="0"
 		fi
 
-		if [ "$testping" -eq 0 ]; then
+		if [ "$testdns" -eq 0 ]; then
 			site1="8.8.8.8"
 			say "TEST 3 - ping : $site1"
 			ping_test "3" "$site1"
 		fi
 
-		if [ "$testping" -gt 0 ] ||  [ "$RXB" -ne 0 ] ; then
+		if [ "$testdns" -gt 0 ] || [ "$testping" -gt 0 ] ; then
 			#printf "%s -  CONNECTED %s \n" "$(date +%T)" ""
 			[[ -e /dev/shm/NOT-CONNECTED ]] && rm /dev/shm/NOT-CONNECTED
 			sleep 0.2 &
@@ -98,7 +102,7 @@ do
 			#printf "\n%s time: %s  Testing.. %s: " "$(date +%T)" "${arrayA[bearer.stats.duration]}" "$site1"
 			#printf "%s -  NOT Connected %s \n" "$(date +%T)" ""
 			echo -n > /dev/shm/NOT-CONNECTED
-			bearer -x
+			bearer --disconnect
 			sleep 0.2
 		fi
 	fi
