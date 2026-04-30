@@ -39,8 +39,8 @@ function calc_RX_TX_seconds()
           sleep 1
           BR2=$(cat /sys/class/net/"${IFN}"/statistics/rx_bytes)
           BT2=$(cat /sys/class/net/"${IFN}"/statistics/tx_bytes)
-          TXB=$((BT2 - BT1))
-          RXB=$((BR2 - BR1))
+          export TXB=$((BT2 - BT1))
+          export RXB=$((BR2 - BR1))
 }
 
 function ping_test()
@@ -75,21 +75,24 @@ function bearer()
 		return 0
 }
 
-function check()
+function retrieve_bearer_info()
 {
-
  		im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 		local ib
 		ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		[[ -z "$ib" ]] && echo "No any bearer." && return 1
+		declare -gA arrayA="( $(mmcli --output-keyvalue --bearer=$ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+}
+
+function check()
+{
+	  cmd_or_print retrieve_bearer_info
 		result="${arrayA[bearer.status.connected]}"
 }
 
 function setIPandROUTE()
 {
-		local ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
-
+	  cmd_or_print retrieve_bearer_info
 		cmd_or_print ip link set up dev "${arrayA[bearer.status.interface]}"
 
 		# remove the actual ip on interface
@@ -130,14 +133,13 @@ function disconnectx()
 
 		#This disconnects the existing connection(s) for the modem and puts it into a low power mode
 		cmd_or_print mmcli --modem="$im" --disable
-		sleep 2
+		cmd_or_print sleep 2
 
 		#Resets the modem to the settings it had when it was power cycled. 
 		cmd_or_print mmcli --modem="$im" --reset
-		sleep 1
+		cmd_or_print sleep 1
 		cmd_or_print sv restart ModemManager
 		datetime
-		btime=$(date +%s)
 		exit
 }
 
