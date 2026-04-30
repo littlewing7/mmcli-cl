@@ -59,7 +59,7 @@ function ping_test()
 function isModemNotExists()
 {
 		local modm
-		modm=$(mmcli -L | grep -m 1 "Modem")
+		modm=$(mmcli --list-modems | grep -m 1 "Modem")
 		[[ -z "$modm" ]] && return 0
 		return 1
 }
@@ -67,42 +67,48 @@ function isModemNotExists()
 function bearer()
 {
 		local ib
-		ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+		ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 		[[ -z "$ib" ]] && echo "No any bearer." && return 1
 
-		#say "execute: -->> mmcli -m $im -b $ib $@ <<--"
-		say "execute: -->> mmcli -m $im -b $ib $* <<--"
-		mmcli -m "$im" -b "$ib" "$@"
+		#say "execute: -->> mmcli --modem=$im --bearer=$ib $@ <<--"
+		say "execute: -->> mmcli --modem=$im --bearer=$ib $* <<--"
+		mmcli --modem="$im" --bearer="$ib" "$@"
 		return 0
 }
 
 function check()
 {
 
- 		im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+ 		im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 		local ib
-		ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+		declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 		result="${arrayA[bearer.status.connected]}"
 }
 
 function setIPandROUTE()
 {
-		local ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+		local ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+		declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 
-		say "Interface: ${arrayA[bearer.status.interface]}"
-		ip link set up dev "${arrayA[bearer.status.interface]}"
+		DEBUG="True"
+		cmd_or_print ip link set up dev "${arrayA[bearer.status.interface]}"
 
 		# remove the actual ip on interface
-		ip a flush "${arrayA[bearer.status.interface]}"
+		cmd_or_print ip a flush "${arrayA[bearer.status.interface]}"
+		cmd_or_print ip a replace "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}" dev "${arrayA[bearer.status.interface]}"
+		cmd_or_print ip r a default via "${arrayA[bearer.ipv4-config.gateway]}"
 
-		say "execute: ip a replace ${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]} dev ${arrayA[bearer.status.interface]}"
-		ip a replace "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}" dev "${arrayA[bearer.status.interface]}"
+		case "$IPTYPE" in
+     ipv4v6|ipv6)
+     # Do stuff
+		   cmd_or_print ip -6 a replace "${arrayA[bearer.ipv6-config.address]}/${arrayA[bearer.ipv6-config.prefix]}" dev "${arrayA[bearer.status.interface]}"
+		   cmd_or_print ip -6 r a default via "${arrayA[bearer.ipv6-config.gateway]}"
+    ;;
+esac
 
-		say "execute: ip r a default via ${arrayA[bearer.ipv4-config.gateway]}"
-		ip r a default via "${arrayA[bearer.ipv4-config.gateway]}"
 
+		DEBUG="False"
 		#echo "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}"
 }
 
@@ -112,7 +118,7 @@ function setIPandROUTE()
 			#!SCNETDNS?
 			#!SCPADDR=<pid>
 
-#		local res=$(mmcli -m "$im" --command=AT+CGCONTRDP)
+#		local res=$(mmcli --modem="$im" --command=AT+CGCONTRDP)
 #		local ip=$( echo "$res" |cut -d, -f4)
 #		local ns1=$(echo "$res" |cut -d, -f6)
 #		local ns2=$(echo "$res" |cut -d, -f7)
@@ -140,7 +146,7 @@ function setIPandROUTE()
 function isNetworkFailed()
 {
 		local state
-		state=$(mmcli -m "$im" | grep -m 1 state | awk '{print $3}' | cut -d\' -f2)
+		state=$(mmcli --modem="$im" | grep -m 1 state | awk '{print $3}' | cut -d\' -f2)
 		[[ "$state" == 'registered' ]] && return 1
 		return 0
 }
@@ -154,16 +160,16 @@ function disconnectx()
 		[[ -n "$scpid" ]] && kill -s 15 "$scpid" && echo Cancelled.
 		pkill ping
 		echo -n > /dev/shm/NOT-CONNECTED
-		bearer -x
-		mmcli -m "$im" --simple-disconnect
+		bearer --disconnect
+		mmcli --modem="$im" --simple-disconnect
 		ip r d default
 
 		#This disconnects the existing connection(s) for the modem and puts it into a low power mode
-		mmcli -m "$im" --disable
+		mmcli --modem="$im" --disable
 		sleep 2
 
 		#Resets the modem to the settings it had when it was power cycled. 
-		mmcli -m "$im" --reset
+		mmcli --modem="$im" --reset
 		sleep 1
 		sv restart ModemManager
 		datetime
@@ -174,10 +180,10 @@ function disconnectx()
 function connectx()
 {
 		say "Start setup-connection scripts..."
-		"$wd/setup-connection" "$APN" &
+		"$wd/setup-connection" "$APN" "$IPTYPE" &
 			   #scpid=$!
 		wait $!
 		scpid=
-		im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+		im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 }
 

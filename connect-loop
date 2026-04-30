@@ -3,6 +3,7 @@
 . "$HOME/.bashrc"
 
 APN="$1"
+IPTYPE="$2"
 
 if [[ $APN"X" == "X" ]] ; then
   printf "%s \n"       " EX: bash /projects/MMA/mmcli-cl/connect-loop datacard.tre.it"
@@ -33,9 +34,9 @@ cp "$wd/sites.list" .
 
 DEBUG="False"
 
-im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
-ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 #sv restart ModemManager
 atime=$(date +%s)
 printf "%s Initial checks, connected time : %s seconds [30s min refresh intervals]\n" "$(date +%T)" "${arrayA[bearer.stats.duration]}"
@@ -48,13 +49,13 @@ do
 	if [[ ! $result == 'yes' ]]; then
 		say "Check FAILED !! <---- "
 		echo -n > /dev/shm/NOT-CONNECTED
-		connectx "$APN"
+		connectx "$APN" "$IPTYPE"
 		sleep 0.5
 	fi
 
-	im=$(mmcli -L |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
-	ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-	declare -A arrayA="( $(mmcli -K --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
+	im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
+	ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+	declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 
 	site1=$(shuf sites.list | head -1)
 	testping=0
@@ -83,7 +84,7 @@ do
 		    setIPandROUTE
 		    say " ---> End setup IP and Routes "
 		    ## extract the new bearer ???  is this necessary ?
-		    ib=$(mmcli -m "$im" |grep -m 1 "Bearer" |cut -d/ -f6)
+		    ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 		    #echo "DNS FALLITO"
         testdns="0"
 		fi
