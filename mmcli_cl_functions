@@ -80,13 +80,12 @@ function retrieve_bearer_info()
  		im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 		local ib
 		ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
-		[[ -z "$ib" ]] && echo "No any bearer." && return 1
 		declare -gA arrayA="( $(mmcli --output-keyvalue --bearer=$ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 }
 
 function check()
 {
-	  cmd_or_print retrieve_bearer_info
+	  retrieve_bearer_info
 		result="${arrayA[bearer.status.connected]}"
 }
 
