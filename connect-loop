@@ -4,10 +4,11 @@
 
 APN="$1"
 IPTYPE="$2"
+DEBUG="$3"
 
 if [[ $APN"X" == "X" ]] ; then
-  printf "%s \n"       " EX: bash /projects/MMA/mmcli-cl/connect-loop datacard.tre.it"
-  printf "%s \n"       " EX: bash /projects/MMA/mmcli-cl/connect-loop mobile.vodafone.it"
+	printf "%s \n"       " EX: bash /projects/MMA/mmcli-cl/connect-loop datacard.tre.it ipv4v6 False(for DEBUG)"
+  printf "%s \n"       " EX: bash /projects/MMA/mmcli-cl/connect-loop mobile.vodafone.it ipv4 True"
 
   say "APN is needed as parameter .....  "
   exit
