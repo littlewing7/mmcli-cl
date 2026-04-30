@@ -71,8 +71,7 @@ function bearer()
 		[[ -z "$ib" ]] && echo "No any bearer." && return 1
 
 		#say "execute: -->> mmcli --modem=$im --bearer=$ib $@ <<--"
-		say "execute: -->> mmcli --modem=$im --bearer=$ib $* <<--"
-		mmcli --modem="$im" --bearer="$ib" "$@"
+		cmd_or_print mmcli --modem="$im" --bearer="$ib" "$@"
 		return 0
 }
 
@@ -91,7 +90,6 @@ function setIPandROUTE()
 		local ib=$(mmcli --modem="$im" |grep -m 1 "Bearer" |cut -d/ -f6)
 		declare -A arrayA="( $(mmcli --output-keyvalue --bearer $ib | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}' ) )"
 
-		DEBUG="True"
 		cmd_or_print ip link set up dev "${arrayA[bearer.status.interface]}"
 
 		# remove the actual ip on interface
@@ -104,44 +102,9 @@ function setIPandROUTE()
      # Do stuff
 		   cmd_or_print ip -6 a replace "${arrayA[bearer.ipv6-config.address]}/${arrayA[bearer.ipv6-config.prefix]}" dev "${arrayA[bearer.status.interface]}"
 		   cmd_or_print ip -6 r a default via "${arrayA[bearer.ipv6-config.gateway]}"
-    ;;
-esac
-
-
-		DEBUG="False"
-		#echo "${arrayA[bearer.ipv4-config.address]}/${arrayA[bearer.ipv4-config.prefix]}"
+     ;;
+    esac
 }
-
-#function setIPandNSS()
-#{
-	# OLD Function consider to remove
-			#!SCNETDNS?
-			#!SCPADDR=<pid>
-
-#		local res=$(mmcli --modem="$im" --command=AT+CGCONTRDP)
-#		local ip=$( echo "$res" |cut -d, -f4)
-#		local ns1=$(echo "$res" |cut -d, -f6)
-#		local ns2=$(echo "$res" |cut -d, -f7)
-#
-#		ip set up dev wwan0 "$ip" set up
-#		ip add default via "$ip"
-#		echo "nameserver $ns1" > /etc/resolv.conf
-#		echo "nameserver $ns2" >> /etc/resolv.conf
-#
-#			## dnsmasq with ISP DNSs and Google DNSs
-#			#cp -a /etc/resolv.conf /etc/resolv.dnsmasq.conf
-#			#sed -i '1i\'"nameserver 8.8.8.8\nnameserver 8.8.4.4" /etc/resolv.dnsmasq.conf
-#			#sed -i '1i\'"nameserver 127.0.0.1" /etc/resolv.conf
-#
-#		## dnsmasq with Google DNSs only
-#		echo "nameserver 127.0.0.1" > /etc/resolv.conf
-#		echo "nameserver 8.8.8.8" > /etc/resolv.dnsmasq.conf
-#		echo "nameserver 8.8.4.4" >> /etc/resolv.dnsmasq.conf
-#
-#		echo "$ip"
-#		echo "$ns1"
-#		echo "$ns2"
-#}
 
 function isNetworkFailed()
 {
@@ -160,18 +123,19 @@ function disconnectx()
 		[[ -n "$scpid" ]] && kill -s 15 "$scpid" && echo Cancelled.
 		pkill ping
 		echo -n > /dev/shm/NOT-CONNECTED
-		bearer --disconnect
-		mmcli --modem="$im" --simple-disconnect
-		ip r d default
+		cmd_or_print bearer --disconnect
+		cmd_or_print mmcli --modem="$im" --simple-disconnect
+		cmd_or_print ip r d default
+		cmd_or_print ip -6 r d default
 
 		#This disconnects the existing connection(s) for the modem and puts it into a low power mode
-		mmcli --modem="$im" --disable
+		cmd_or_print mmcli --modem="$im" --disable
 		sleep 2
 
 		#Resets the modem to the settings it had when it was power cycled. 
-		mmcli --modem="$im" --reset
+		cmd_or_print mmcli --modem="$im" --reset
 		sleep 1
-		sv restart ModemManager
+		cmd_or_print sv restart ModemManager
 		datetime
 		btime=$(date +%s)
 		exit

@@ -29,9 +29,9 @@ echo
 im=$(mmcli --list-modems |grep -m 1 "Modem" |cut -d/ -f6 |awk '{print $1}')
 
 say ">> Resetting.."
-bearer --disconnect
-ip r d default
-ip -6 r d default
+cmd_or_print bearer --disconnect
+cmd_or_print ip r d default
+cmd_or_print ip -6 r d default
 echo
 #mmcli --modem="$im" --set-allowed-modes='any'
 #mmcli --modem="$im" --set-allowed-modes='4g'
@@ -46,7 +46,6 @@ echo
 #sleep 1
 
 say ">> Checking bearer.."
-#declare -A a="( $(mmcli --modem="$im" --output-keyvalue ) )"
 declare -A arrayM="( $(mmcli --modem="$im" --output-keyvalue | awk '{ printf "[\"%s\"]=\"%s\" ", $1, $3}') )"
 	#[[ $a == 1 ]] && mmcli --modem=$im --create-bearer="apn=3data,number=*99#,user=3data,password=3data,allow-roaming=1,ip-type=ipv4,allowed-auth=eap|pap|chap" || echo "Bearer already exist."
 #[[ "$a" == 1 ]] && mmcli --modem="$im" --create-bearer="apn=indosatgprs,number=*99#,user=indosat,password=indosat,allow-roaming=1,ip-type=ipv4,allowed-auth=eap|pap|chap" || echo "Bearer already exist."
@@ -54,9 +53,7 @@ if [ "$((${arrayM[modem.generic.bearers.length]}))" -gt 0 ] ; then
 	say "Already exist Bearer: "
 	say "${arrayM[modem.generic.bearers.value[1]]}"
 else
-	#mmcli --modem="$im" --create-bearer="apn=mobile.vodafone.it"
 	say ">> Creating bearer: apn=${APN}"
-	#cmd_or_print mmcli --modem="$im" --create-bearer="apn=${APN},ip-type=ipv4"
 	cmd_or_print mmcli --modem="$im" --create-bearer="apn=${APN},ip-type=${IPTYPE}"
 fi
 
@@ -96,8 +93,8 @@ done
 #sleep 2
 
 say ">> Enabling Modem signal-setup"
-DEBUG="True" cmd_or_print mmcli --modem="$im" --signal-setup=2
+cmd_or_print mmcli --modem="$im" --signal-setup=2
 
 say ">> Setup wwan interface and default route."
-setIPandROUTE
+cmd_or_print setIPandROUTE
 
